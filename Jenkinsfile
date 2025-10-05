@@ -40,8 +40,8 @@ spec:
       when { branch 'main' }
       steps {
         withCredentials([usernamePassword(credentialsId: 'dockerhub_creds',
-                                          usernameVariable: 'DH_USER',
-                                          passwordVariable: 'DH_PASS')]) {
+                                          usernameVariable: 'dipen7466',
+                                          passwordVariable: '9016651945@Dipen')]) {
           container('maven') {
             sh '''
               set -eux
