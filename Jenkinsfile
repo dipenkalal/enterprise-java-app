@@ -58,23 +58,7 @@ spec:
     }
 
     stage('Build & Push Image (main only)') {
-      when { branch 'main' }
-      steps {
-        withCredentials([usernamePassword(credentialsId: 'dockerhub_creds',
-                                          usernameVariable: 'DH_USER',
-                                          passwordVariable: 'DH_PASS')]) {
-          container('maven') {
-            sh '''
-              mvn -B -ntp -DskipTests \
-                -Dimage=${DOCKER_IMAGE}:${IMAGE_TAG} \
-                -Djib.to.image=${DOCKER_IMAGE}:${IMAGE_TAG} \
-                -Djib.to.auth.username=${DH_USER} \
-                -Djib.to.auth.password=${DH_PASS} \
-                com.google.cloud.tools:jib-maven-plugin:build
-            '''
-          }
-        }
-      }
+      
     }
 
     stage('Update GitOps tag (main only)') {
