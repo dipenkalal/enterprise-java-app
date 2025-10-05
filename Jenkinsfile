@@ -61,7 +61,7 @@ spec:
           sh '''
             rm -rf gitops && git clone https://${GH_USER}:${GH_PAT}@github.com/dipenkalal/enterprise-gitops.git gitops
             cd gitops
-            # update the "tag:" in values-dev.yaml
+            # update "tag:" line in values-dev.yaml
             awk -v tag="${IMAGE_TAG}" '
               BEGIN{done=0}
               /^ *tag:/ && !done { print "  tag: " tag; done=1; next }
