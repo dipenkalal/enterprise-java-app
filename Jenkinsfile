@@ -36,28 +36,28 @@ spec:
       }
     }
 
-    stage('Build & Push Image (main only)') {
-      when { branch 'main' }
-      steps {
-        withCredentials([usernamePassword(credentialsId: 'dockerhub_creds',
-                                          usernameVariable: 'dipen7466',
-                                          passwordVariable: '9016651945@Dipen')]) {
-          container('maven') {
-            sh '''
-              set -eux
-              IMAGE_TAG="b${BUILD_NUMBER}-dev"
-              IMAGE_PATH="docker.io/${DH_USER}/java-app:${IMAGE_TAG}"
+// Build & Push stage (main only)
+when { branch 'main' }
+steps {
+  withCredentials([usernamePassword(
+    credentialsId: 'dockerhub_creds',   // <— use this ID
+    usernameVariable: 'DH_USER',
+    passwordVariable: 'DH_PASS'
+  )]) {
+    sh '''
+      set -eux
+      IMAGE_TAG="b${BUILD_NUMBER}-dev"
+      IMAGE_PATH="docker.io/${DH_USER}/java-app:${IMAGE_TAG}"
 
-              mvn -B -ntp -DskipTests \
-                com.google.cloud.tools:jib-maven-plugin:3.4.4:build \
-                -Djib.to.image="${IMAGE_PATH}" \
-                -Djib.to.auth.username="${DH_USER}" \
-                -Djib.to.auth.password="${DH_PASS}"
-            '''
-          }
-        }
-      }
-    }
+      mvn -B -ntp -DskipTests \
+        com.google.cloud.tools:jib-maven-plugin:3.4.4:build \
+        -Djib.to.image="${IMAGE_PATH}" \
+        -Djib.to.auth.username="${DH_USER}" \
+        -Djib.to.auth.password="${DH_PASS}"
+    '''
+  }
+}    
+
 
     stage('Update GitOps tag (main only)') {
       when { branch 'main' }
