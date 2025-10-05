@@ -39,7 +39,7 @@ spec:
     stage('Build & Push Image (main only)') {
       when { branch 'main' }
       steps {
-        withCredentials([usernamePassword(credentialsId: 'dockerhub',
+        withCredentials([usernamePassword(credentialsId: 'dockerhub_creds',
                                           usernameVariable: 'DH_USER',
                                           passwordVariable: 'DH_PASS')]) {
           container('maven') {
