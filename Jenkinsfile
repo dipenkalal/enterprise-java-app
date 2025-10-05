@@ -14,16 +14,26 @@ spec:
     }
   }
 
+  options {
+    buildDiscarder(logRotator(numToKeepStr: '20'))
+    skipDefaultCheckout(true)
+    timestamps()
+    ansiColor('xterm')
+  }
+
   environment {
     DOCKER_IMAGE = "docker.io/dipenkalal/java-app"
-    IMAGE_TAG    = "build-${env.BUILD_NUMBER}"
+    GIT_SHA      = sh(returnStdout: true, script: 'git rev-parse --short HEAD || echo dev').trim()
+    IMAGE_TAG    = "b${env.BUILD_NUMBER}-${GIT_SHA}"
     GITOPS_REPO  = "https://github.com/dipenkalal/enterprise-gitops.git"
     GITOPS_PATH  = "apps/java-app/values-dev.yaml"
   }
 
   stages {
     stage('Checkout') {
-      steps { checkout scm }
+      steps {
+        checkout scm
+      }
     }
 
     stage('Build & Test') {
@@ -32,9 +42,23 @@ spec:
           sh 'mvn -B -ntp clean verify'
         }
       }
+      post {
+        always {
+          junit 'target/surefire-reports/*.xml'
+          archiveArtifacts artifacts: 'target/*.jar', allowEmptyArchive: true
+          publishHTML(target: [
+            reportDir: 'target/surefire-reports',
+            reportFiles: 'index.html',
+            reportName: 'Surefire report',
+            keepAll: true,
+            alwaysLinkToLastBuild: true
+          ])
+        }
+      }
     }
 
-    stage('Build & Push Image (Jib)') {
+    stage('Build & Push Image (main only)') {
+      when { branch 'main' }
       steps {
         withCredentials([usernamePassword(credentialsId: 'dockerhub_creds',
                                           usernameVariable: 'DH_USER',
@@ -53,7 +77,8 @@ spec:
       }
     }
 
-    stage('Update GitOps tag') {
+    stage('Update GitOps tag (main only)') {
+      when { branch 'main' }
       steps {
         withCredentials([usernamePassword(credentialsId: 'github_https',
                                           usernameVariable: 'GH_USER',
@@ -61,13 +86,11 @@ spec:
           sh '''
             rm -rf gitops && git clone https://${GH_USER}:${GH_PAT}@github.com/dipenkalal/enterprise-gitops.git gitops
             cd gitops
-            # update "tag:" line in values-dev.yaml
             awk -v tag="${IMAGE_TAG}" '
               BEGIN{done=0}
               /^ *tag:/ && !done { print "  tag: " tag; done=1; next }
               { print }
             ' ${GITOPS_PATH} > tmp && mv tmp ${GITOPS_PATH}
-
             git config user.name "jenkins-bot"
             git config user.email "jenkins-bot@example.com"
             git add ${GITOPS_PATH}
@@ -80,6 +103,8 @@ spec:
   }
 
   post {
-    always { echo "Build #${env.BUILD_NUMBER} -> ${DOCKER_IMAGE}:${IMAGE_TAG}" }
+    success { echo "OK: ${env.BRANCH_NAME} -> ${DOCKER_IMAGE}:${IMAGE_TAG}" }
+    failure { echo "FAILED: ${env.BRANCH_NAME}" }
+    always  { echo "Build #${env.BUILD_NUMBER} finished: ${currentBuild.currentResult}" }
   }
 }
