@@ -64,11 +64,17 @@ stage('SonarQube Analysis') {
 }
 stage('Quality Gate') {
   steps {
-    timeout(time: 2, unit: 'MINUTES') {
-      waitForQualityGate abortPipeline: true
+    timeout(time: 10, unit: 'MINUTES') {
+      script {
+        def qg = waitForQualityGate() // waits for webhook/polls
+        if (qg.status != 'OK') {
+          error "Quality Gate failed: ${qg.status}"
+        }
+      }
     }
   }
 }
+
 
 
 
