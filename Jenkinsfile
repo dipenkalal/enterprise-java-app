@@ -44,6 +44,22 @@ spec:
       }
     }
 
+    stage('SonarQube Analysis') {
+  steps {
+    container('maven') {
+      withSonarQubeEnv('SonarQube') {
+        sh '''
+          mvn -B verify sonar:sonar \
+            -Dsonar.projectKey=java-app \
+            -Dsonar.host.url=$SONAR_HOST_URL \
+            -Dsonar.login=$SONAR_AUTH_TOKEN
+        '''
+      }
+    }
+  }
+}
+
+
     stage('Build & Push Image (main only)') {
       when { branch 'main' }
       steps {
