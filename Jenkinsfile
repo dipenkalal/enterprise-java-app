@@ -55,7 +55,6 @@ stage('SonarQube Analysis') {
             mvn -B -ntp verify sonar:sonar \
               -Dsonar.projectKey=java-app \
               -Dsonar.projectName=java-app \
-              -Dsonar.host.url=$SONAR_HOST_URL \
               -Dsonar.token=$SONAR_TOKEN
           '''
         }
@@ -63,6 +62,14 @@ stage('SonarQube Analysis') {
     }
   }
 }
+stage('Quality Gate') {
+  steps {
+    timeout(time: 2, unit: 'MINUTES') {
+      waitForQualityGate abortPipeline: true
+    }
+  }
+}
+
 
 
   }
