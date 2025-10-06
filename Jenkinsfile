@@ -48,7 +48,6 @@ stage('SonarQube Analysis') {
   when { branch 'main' }
   steps {
     container('maven') {
-      // The name here must match your Jenkins "Manage Jenkins → System → SonarQube servers" entry
       withSonarQubeEnv('SonarQube') {
         sh '''
           mvn -B verify sonar:sonar \
@@ -61,6 +60,7 @@ stage('SonarQube Analysis') {
     }
   }
 }
+
 
 
 
