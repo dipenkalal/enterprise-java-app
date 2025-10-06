@@ -44,20 +44,24 @@ spec:
       }
     }
 
-    stage('SonarQube Analysis') {
+stage('SonarQube Analysis') {
+  when { branch 'main' }
   steps {
     container('maven') {
+      // The name here must match your Jenkins "Manage Jenkins → System → SonarQube servers" entry
       withSonarQubeEnv('SonarQube') {
         sh '''
           mvn -B verify sonar:sonar \
-            -Dsonar.projectKey=java-app \
+            -Dsonar.projectKey=Enterprise-Java-App \
+            -Dsonar.projectName=java-app \
             -Dsonar.host.url=$SONAR_HOST_URL \
-            -Dsonar.login=$SONAR_AUTH_TOKEN
+            -Dsonar.token=$SONAR_AUTH_TOKEN
         '''
       }
     }
   }
 }
+
 
 
     stage('Build & Push Image (main only)') {
