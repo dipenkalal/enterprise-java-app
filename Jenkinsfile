@@ -45,24 +45,23 @@ spec:
     }
 
 stage('SonarQube Analysis') {
-  when { branch 'main' }
+  agent { label 'maven' }
   steps {
     container('maven') {
       withSonarQubeEnv('SonarQube') {
-        sh '''
-          mvn -B verify sonar:sonar \
-            -Dsonar.projectKey=Enterprise-Java-App \
-            -Dsonar.projectName=java-app \
-            -Dsonar.host.url=$SONAR_HOST_URL \
-            -Dsonar.token=$SONAR_AUTH_TOKEN
-        '''
+        withCredentials([string(credentialsId: 'sonar-token', variable: 'SONAR_TOKEN')]) {
+          sh '''
+            mvn -B verify sonar:sonar \
+              -Dsonar.projectKey=Enterprise-Java-App \
+              -Dsonar.projectName=java-app \
+              -Dsonar.host.url=http://sonarqube-sonarqube.ci.svc.cluster.local:9000 \
+              -Dsonar.token=$SONAR_TOKEN
+          '''
+        }
       }
     }
   }
 }
-
-
-
 
     stage('Build & Push Image (main only)') {
       when { branch 'main' }
