@@ -47,8 +47,7 @@ spec:
 
 stage('SonarQube Analysis') {
   agent { label 'maven' }
-  steps {
-    container('maven') {
+  steps { 
       withSonarQubeEnv('SonarQube') {
   withCredentials([string(credentialsId: 'sonar-token', variable: 'SONAR_TOKEN')]) {
     sh """
@@ -60,8 +59,7 @@ stage('SonarQube Analysis') {
     """
   }
 }
-
-    }
+    
   }
 }
 
