@@ -77,9 +77,9 @@ It automates the entire lifecycle — from **code commit** to **deployment** on 
    - Performs code quality scan and uploads results to SonarQube.
 4. **Quality Gate**  
    - Jenkins waits for SonarQube to approve the analysis.
-5. **(Optional)** Docker Build & Push  
+5. **Docker Build & Push**  
    - Jenkins builds and pushes the container image (future stage).
-6. **(Optional)** GitOps Sync via Argo CD  
+6. **GitOps Sync via Argo CD**
    - Automatically triggers deployment through GitOps repo updates.
 
 ---
@@ -280,3 +280,4 @@ providers:
 
 **© 2025 — Dipen Kalal**  
 *All rights reserved for educational and demonstration use.*
+
